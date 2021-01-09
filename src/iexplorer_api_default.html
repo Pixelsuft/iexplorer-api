@@ -1,0 +1,63 @@
+<html>
+<head>
+<title>IExplorer example</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style rel="stylesheet" type="text/css">
+	*{
+		cursor: default;
+		user-select: none;
+		margin: 0px;
+		font-family: Segoe UI;
+		font-size: 20px;
+		text-shadow: 0px 0px 0px gray;
+		color: black;
+	}
+	img{
+		width: 50%;
+		height: 50%;
+	}
+</style>
+</head>
+<body id="root">
+	<img src="icons/iexplorer.png"><br>
+	<center>Hello, world!!!</center><br>
+	<a href="test.html">Error 1</a>
+</body>
+<script language="JavaScript" type="text/javascript">
+function makeUnselectable(node) {
+    if (node.nodeType == 1) {
+        node.setAttribute("unselectable", "on");
+    }
+    var child = node.firstChild;
+    while (child) {
+        makeUnselectable(child);
+        child = child.nextSibling;
+    }
+}
+makeUnselectable(document.getElementById("root"));
+
+
+function clickIE() {
+    if (document.all) {
+        return false;
+    }
+}
+function clickAll(e) {
+    if (document.layers || (document.getElementById && !document.all)) {
+        if (e.which == 2 || e.which == 3) {
+            return false;
+        }
+    }
+}
+if (document.layers) {
+    document.captureEvents(Event.MOUSEDOWN);
+    document.onmousedown = clickAll;
+} else {
+    document.onmouseup = clickAll;
+    document.oncontextmenu = clickIE;
+}
+
+document.oncontextmenu = new Function("return false");
+</script>
+</html>

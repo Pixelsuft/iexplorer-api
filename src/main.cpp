@@ -1,0 +1,265 @@
+//---------------------------------------------------------------------------
+
+#include <vcl.h>
+#pragma hdrstop
+#include <iostream.h>
+#include <cstdlib.h>
+#include "main.h"
+//---------------------------------------------------------------------------
+#pragma package(smart_init)
+#pragma link "SHDocVw_OCX"
+#pragma resource "*.dfm"
+TMainForm *MainForm;
+AnsiString form_align_x="center";
+AnsiString form_align_y="center";
+int custom_x=0;
+int custom_y=0;
+int alpha=255;
+bool show_url_in_caption=false;
+bool sys_close=false;
+bool sys_max=false;
+bool sys_min=false;
+bool can_close_me=true;
+AnsiString can_close_file="";
+AnsiString can_close_url="";
+//---------------------------------------------------------------------------
+__fastcall TMainForm::TMainForm(TComponent* Owner)
+        : TForm(Owner)
+{
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainForm::StartupTimer(TObject *Sender)
+{
+        Startup->Enabled=false;
+        load_config->Enabled=true;
+        check_reload->Enabled=true;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TMainForm::load_configTimer(TObject *Sender)
+{
+        load_config->Enabled=false;
+        Browser->Navigate(WideString(GetCurrentDir()+"/iexplorer_api_default.html"));
+        if(!FileExists("iexplorer_config.txt"))Application->Terminate();
+        else config->Lines->LoadFromFile("iexplorer_config.txt");
+        for(int i=0;i<=500;i++)
+        {
+                AnsiString cur_str=config->Lines->Strings[i];
+                AnsiString next_str=config->Lines->Strings[i+1];
+                if(cur_str==":endconfig")break;
+                if(cur_str==":align_x")form_align_x=next_str;
+                if(cur_str==":align_y")form_align_y=next_str;
+                if(cur_str==":custom_x")custom_x=StrToInt(next_str);
+                if(cur_str==":custom_y")custom_y=StrToInt(next_str);
+                if(cur_str==":alpha")alpha=StrToInt(next_str);
+                if(cur_str==":width")MainForm->Width=StrToInt(next_str);
+                if(cur_str==":height")MainForm->Height=StrToInt(next_str);
+                if(cur_str==":min_width")MainForm->Constraints->MinWidth=StrToInt(next_str);
+                if(cur_str==":min_height")MainForm->Constraints->MinHeight=StrToInt(next_str);
+                if(cur_str==":max_width")MainForm->Constraints->MaxWidth=StrToInt(next_str);
+                if(cur_str==":max_height")MainForm->Constraints->MaxHeight=StrToInt(next_str);
+                if(cur_str==":show_url_in_caption")
+                {
+                        if(next_str=="true")show_url_in_caption=true;
+                        else show_url_in_caption=false;
+                }
+                if(cur_str==":system_close")
+                {
+                        if(next_str=="true")sys_close=true;
+                        else sys_close=false;
+                }
+                if(cur_str==":system_maximize")
+                {
+                        if(next_str=="true")sys_max=true;
+                        else sys_max=false;
+                }
+                if(cur_str==":system_minimize")
+                {
+                        if(next_str=="true")sys_min=true;
+                        else sys_min=false;
+                }
+                if(cur_str==":on_top")
+                {
+                        if(next_str=="true")MainForm->FormStyle=fsStayOnTop;
+                        else MainForm->FormStyle=fsNormal;
+                }
+                if(cur_str==":chroma_key")
+                {
+                        if(next_str=="true")MainForm->TransparentColor=true;
+                        else MainForm->TransparentColor=false;
+                }
+                if(cur_str==":can_close")
+                {
+                        if(next_str=="true")can_close_me=true;
+                        else can_close_me=false;
+                }
+                if(cur_str==":chroma_key_color")
+                {
+                        MainForm->TransparentColorValue=StringToColor(next_str);
+                }
+                if(cur_str==":border_style")
+                {
+                        if(next_str=="dialog")MainForm->BorderStyle=bsDialog;
+                        else if(next_str=="none")MainForm->BorderStyle=bsNone;
+                        else if(next_str=="single")MainForm->BorderStyle=bsSingle;
+                        else if(next_str=="size_tool_window")MainForm->BorderStyle=bsSizeToolWin;
+                        else if(next_str=="tool_window")MainForm->BorderStyle=bsToolWindow;
+                        else MainForm->BorderStyle=bsSizeable;
+                }                           
+                if(cur_str==":redirect_to_file")
+                {
+                        Browser->Navigate(WideString(GetCurrentDir()+"\\"+next_str));
+                }                          
+                if(cur_str==":can_close_file")
+                {
+                        can_close_file=next_str;
+                }                      
+                if(cur_str==":can_close_url")
+                {
+                        can_close_url=next_str;
+                }
+                if(cur_str==":redirect_to_url")
+                {
+                        Browser->Navigate(WideString(next_str));
+                }
+                if(cur_str==":caption" && show_url_in_caption==false)MainForm->Caption=next_str;
+                if(cur_str==":icon" && FileExists(next_str))MainForm->Icon->LoadFromFile(next_str);
+        }
+        if(form_align_x=="right")
+        {
+                MainForm->Left=Screen->Width-MainForm->Width;
+        }
+        else if(form_align_x=="center")
+        {
+                MainForm->Left=Screen->Width/2-MainForm->Width/2;
+        }
+        else if(form_align_x=="left")
+        {
+                MainForm->Left=0;
+        }
+        else
+        {
+                MainForm->Left=custom_x;
+        }
+        if(form_align_y=="down")
+        {
+                MainForm->Top=Screen->Height-MainForm->Height;
+        }
+        else if(form_align_y=="center")
+        {
+                MainForm->Top=Screen->Height/2-MainForm->Height/2;
+        }
+        else if(form_align_y=="left")
+        {
+                MainForm->Top=0;
+        }
+        else
+        {
+                MainForm->Top=custom_y;
+        }
+        MainForm->AlphaBlendValue=alpha;
+        if(FileExists("iexplorer_config_reloaded.txt"))
+        {
+                config->Lines->SaveToFile("iexplorer_config_reload_ok.txt");
+        }
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TMainForm::check_reloadTimer(TObject *Sender)
+{
+        if(FileExists("iexplorer_config_reloaded.txt"))
+        {
+                load_config->Enabled=true;
+        }
+        if(FileExists("iexplorer_is_running.txt"))
+        {
+                config->Lines->SaveToFile("iexplorer_i_am_running.txt");
+        }
+        if(FileExists("iexplorer_terminate.txt"))
+        {
+                config->Lines->SaveToFile("iexplorer_terminated.txt");
+                Application->Terminate();
+        }
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TMainForm::BrowserBeforeNavigate2(TObject *Sender,
+      LPDISPATCH pDisp, Variant *URL, Variant *Flags,
+      Variant *TargetFrameName, Variant *PostData, Variant *Headers,
+      VARIANT_BOOL *Cancel)
+{
+        url_saver->Lines->Strings[0]=*URL;
+        AnsiString url=*URL;
+        AnsiString url_check_error_404="";
+        AnsiString dir=GetCurrentDir();
+        for(int i=0;i<=url.Length();i++)
+        {
+                if(url.SubString(i,1)=="#")break;
+                else url_check_error_404+=url.SubString(i,1);
+        }
+        if(url_check_error_404=="res://ieframe.dll/dnserrordiagoff.html")url="error404";
+        url_saver->Lines->SaveToFile("iexplorer_url.txt");
+        if(show_url_in_caption==true)
+        {
+                MainForm->Caption=*URL;
+        }
+        for(int i=0;i<=500;i++)
+        {
+                AnsiString str0=config->Lines->Strings[i];
+                AnsiString str1=config->Lines->Strings[i+1];
+                AnsiString str2=config->Lines->Strings[i+2];
+                if(str0==":endconfig")break;
+                if(str0==":caption_on")
+                {
+                        if(dir+"\\"+str1==url || str1==url)
+                        {
+                                MainForm->Caption=str2;
+                        }
+                }
+                if(str0==":icon_on")
+                {
+                        if(dir+"\\"+str1==url || str1==url)
+                        {
+                                if(FileExists(str2))MainForm->Icon->LoadFromFile(str2);
+                        }
+                }
+                if(str0==":redirect_to_file_on")
+                {
+                        if(dir+"\\"+str1==url || str1==url)
+                        {
+                                Browser->Navigate(WideString(dir+"\\"+str2));
+                        }
+                }
+                if(str0==":redirect_to_url_on")
+                {
+                        if(dir+"\\"+str1==url || str1==url)
+                        {
+                                Browser->Navigate(WideString(str2));
+                        }
+                }
+        }
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TMainForm::FormCloseQuery(TObject *Sender, bool &CanClose)
+{
+        CanClose=false;
+        if(can_close_me==true)
+        {
+                CanClose=true;
+        }
+        else
+        {
+                if(can_close_url!="")
+                {
+                        Browser->Navigate(WideString(can_close_url));
+                }
+                else if(can_close_file!="")
+                {
+                        Browser->Navigate(WideString(GetCurrentDir()+"\\"+can_close_file));
+                }
+                else CanClose=true;
+        }
+}
+//---------------------------------------------------------------------------
+
