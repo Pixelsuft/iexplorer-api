@@ -1,6 +1,7 @@
 # Internet Explorer API
 Python package as eel<br />
-![Screenshot](https://github.com/Pixelsuft/iexplorer-api/blob/main/iexplorer.png?raw=true)
+![Screenshot1](https://github.com/Pixelsuft/iexplorer-api/blob/main/iexplorer.png?raw=true)<br />
+![Screenshot2](https://github.com/Pixelsuft/iexplorer-api/blob/main/screenshot.png?raw=true)
 # Getting Started
 Install:
 ```
