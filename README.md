@@ -14,3 +14,5 @@ Type "help", "copyright", "credits" or "license" for more information.
 >>> import iexplorer_api as ie
 >>> ie.run()
 ```
+# Recommended to build
+Use NUITKA for build
